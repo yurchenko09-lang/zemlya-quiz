@@ -1,0 +1,454 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Правда чи Земля бреше?</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,600;0,9..144,700;1,9..144,500&family=Source+Sans+3:wght@400;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+  :root{
+    --paper: #EEF1EA; --card: #FBFBF7; --ink: #202A22; --ink-muted: #5B6459; --line: #D7DBCC;
+    --btn-bg: #202A22; --btn-fg: #F4F6EF;
+    --truth: #3F7D58; --myth: #A8443B;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --paper: #13170F; --card: #1D2318; --ink: #E8ECE0; --ink-muted: #9AA391; --line: #2B3226;
+      --btn-bg: #E8ECE0; --btn-fg: #13170F; --truth: #70C08D; --myth: #E08579;
+    }
+  }
+  *{ box-sizing: border-box; }
+  body{
+    margin: 0; min-height: 100vh; background: var(--paper); color: var(--ink);
+    font-family: 'Source Sans 3', system-ui, sans-serif; display: flex; flex-direction: column;
+  }
+  .wrap{ max-width: 1200px; margin: 0 auto; padding: 1.5rem; width: 100%; flex: 1; display: flex; flex-direction: column; }
+  .wrap.narrow{ max-width: 480px; }
+  .eyebrow{ font-family: 'IBM Plex Mono', monospace; font-size: 0.75rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-muted); text-align: center; margin: 0 0 0.4rem; }
+  h1{ font-family: 'Fraunces', serif; font-weight: 700; text-align: center; margin: 0 0 1.2rem; font-size: clamp(1.4rem, 4vw, 2.2rem); }
+
+  /* --- shared --- */
+  .card{ background: var(--card); border: 1px solid var(--line); border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.06); padding: 1.4rem; }
+  .center{ text-align: center; }
+  .muted{ color: var(--ink-muted); }
+  input[type=password], input[type=text], select{
+    font-family: 'IBM Plex Mono', monospace; font-size: 1rem; padding: 0.6rem 0.8rem; border-radius: 4px;
+    border: 1px solid var(--line); background: var(--paper); color: var(--ink);
+  }
+  input[type=password]{ width: 8rem; text-align: center; }
+  button{ font-family: 'IBM Plex Mono', monospace; cursor: pointer; border: none; border-radius: 6px; }
+  .btn{ background: var(--btn-bg); color: var(--btn-fg); padding: 0.7rem 1.3rem; font-size: 0.95rem; letter-spacing: 0.03em; text-transform: uppercase; }
+  .btn.ghost{ background: transparent; color: var(--ink-muted); border: 1px solid var(--line); }
+  .btn.danger{ background: var(--myth); color: #fff; }
+  .btn:disabled{ opacity: 0.4; cursor: default; }
+
+  /* --- registration form --- */
+  .reg-form{ display: flex; flex-direction: column; gap: 0.8rem; text-align: left; }
+  .reg-form label{ font-family: 'IBM Plex Mono', monospace; font-size: 0.72rem; text-transform: uppercase; color: var(--ink-muted); letter-spacing: 0.05em; display: block; margin-bottom: 0.3rem; }
+  .reg-form select, .reg-form input[type=text]{ width: 100%; font-size: 1.05rem; padding: 0.65rem 0.7rem; }
+
+  /* --- student voting view --- */
+  .vote-btn{
+    display: block; width: 100%; padding: 2.2rem 1rem; font-family: 'Fraunces', serif; font-weight: 700;
+    font-size: clamp(1.6rem, 8vw, 2.4rem); border-radius: 12px; margin-bottom: 1rem; color: #fff;
+    transition: transform 0.1s;
+  }
+  .vote-btn:active{ transform: scale(0.97); }
+  .vote-btn.truth{ background: var(--truth); }
+  .vote-btn.myth{ background: var(--myth); }
+  .status-text{ text-align: center; font-family: 'Fraunces', serif; font-style: italic; font-size: 1.15rem; margin: 1.5rem 0; }
+  .qcount{ text-align: center; font-family: 'IBM Plex Mono', monospace; font-size: 0.85rem; color: var(--ink-muted); margin-bottom: 1.5rem; }
+  .whoami{ text-align: center; font-family: 'IBM Plex Mono', monospace; font-size: 0.7rem; color: var(--ink-muted); margin-bottom: 1rem; }
+  .result-banner{ text-align: center; font-family: 'Fraunces', serif; font-weight: 700; font-size: 1.4rem; padding: 1.1rem; border-radius: 10px; }
+  .result-banner.correct{ background: color-mix(in srgb, var(--truth) 20%, transparent); color: var(--truth); }
+  .result-banner.wrong{ background: color-mix(in srgb, var(--myth) 20%, transparent); color: var(--myth); }
+  .result-banner.missed{ background: var(--paper); color: var(--ink-muted); border: 1px dashed var(--line); }
+
+  /* --- TV / host view --- */
+  .tv-question{ font-family: 'Fraunces', serif; font-weight: 600; font-size: clamp(1.6rem, 3.4vw, 2.6rem); text-align: center; line-height: 1.35; margin: 1.2rem 0 2rem; text-wrap: balance; }
+  .bars{ display: flex; gap: 1.5rem; margin-bottom: 1.8rem; }
+  .bar-col{ flex: 1; }
+  .bar-label{ font-family: 'IBM Plex Mono', monospace; font-size: 1rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem; display: flex; justify-content: space-between; }
+  .bar-track{ height: 2.6rem; background: var(--paper); border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+  .bar-fill{ height: 100%; transition: width 0.4s ease; min-width: 2px; }
+  .bar-fill.truth{ background: var(--truth); }
+  .bar-fill.myth{ background: var(--myth); }
+  .reveal-banner{ text-align: center; font-family: 'Fraunces', serif; font-weight: 700; font-size: 1.5rem; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; }
+  .reveal-banner.truth{ background: color-mix(in srgb, var(--truth) 20%, transparent); color: var(--truth); }
+  .reveal-banner.myth{ background: color-mix(in srgb, var(--myth) 20%, transparent); color: var(--myth); }
+  .explain{ text-align: center; font-size: 1.05rem; margin-bottom: 1.5rem; }
+  .controls{ display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem; }
+  .join{ display: flex; align-items: center; gap: 1.2rem; justify-content: center; margin-top: 1.2rem; flex-wrap: wrap; }
+  .join img{ border-radius: 8px; border: 1px solid var(--line); }
+  .join .link{ font-family: 'IBM Plex Mono', monospace; font-size: 1rem; }
+  .start-screen, .end-screen{ text-align: center; padding: 2rem 1rem; }
+
+  .stats-wrap{ margin-top: 1.5rem; border-top: 1px dashed var(--line); padding-top: 1rem; }
+  .stats-title{ font-family: 'IBM Plex Mono', monospace; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--ink-muted); margin: 0 0 0.7rem; text-align: center; }
+  table.stats{ width: 100%; border-collapse: collapse; font-size: 0.95rem; }
+  table.stats th, table.stats td{ padding: 0.45rem 0.6rem; border-bottom: 1px solid var(--line); text-align: left; }
+  table.stats th{ font-family: 'IBM Plex Mono', monospace; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--ink-muted); }
+  table.stats td.num{ text-align: center; font-variant-numeric: tabular-nums; font-family: 'IBM Plex Mono', monospace; }
+  table.stats td.num.correct{ color: var(--truth); font-weight: 600; }
+  table.stats td.num.wrong{ color: var(--myth); font-weight: 600; }
+  table.stats td.num.missed{ color: var(--ink-muted); }
+</style>
+</head>
+<body>
+<div class="wrap" id="app-wrap">
+  <h1>Правда чи Земля бреше?</h1>
+  <div id="content" class="card center">Завантаження…</div>
+</div>
+
+<script>
+(function(){
+  var BASE = 'https://kabinet-10b17-default-rtdb.firebaseio.com';
+  var META_URL = BASE + '/quiz/meta.json';
+  var STUDENTS_URL = BASE + '/quiz/students.json';
+  var ANSWERS_URL = BASE + '/quiz/answers.json';
+  var studentUrl = function(id){ return BASE + '/quiz/students/' + id + '.json'; };
+  var answerUrl = function(idx, id){ return BASE + '/quiz/answers/' + idx + '/' + id + '.json'; };
+  var STUDENT_URL = location.origin + location.pathname;
+  var PIN = '25';
+
+  // Редагуйте цей список під ваші реальні групи.
+  var GROUPS = ['101', '102', '103'];
+
+  var QUESTIONS = [
+    { text: 'Земля — ідеальна куля.', answer: false, explain: 'Насправді вона трохи сплюснута з полюсів (геоїд) — обертання «розпирає» екватор.' },
+    { text: 'Всередині Землі тече розплавлене залізо.', answer: true, explain: 'Зовнішнє ядро — саме рідке залізо з нікелем, і саме цей рух створює магнітне поле планети.' },
+    { text: 'Пісок пустелі й пісок пляжу — це одна й та сама речовина.', answer: false, explain: 'Пустельний пісок округлий і «відшліфований» вітром, пляжний — гостріший, бо його точить вода й хвилі.' },
+    { text: 'Гора Еверест щороку стає трохи вищою.', answer: true, explain: 'Індійська плита й далі напирає на Азійську — Гімалаї ростуть на кілька міліметрів на рік.' },
+    { text: 'Блискавка ніколи не б’є двічі в одне місце.', answer: false, explain: 'Ще й як б’є — високі об’єкти можуть отримувати удари по кілька разів за один шторм.' },
+    { text: 'Материки колись були одним суперконтинентом.', answer: true, explain: 'Пангея — і контури Африки й Південної Америки досі «сходяться», як пазл.' },
+    { text: 'Землетруси бувають тільки на межах тектонічних плит.', answer: false, explain: 'Більшість — так, але трапляються і «внутрішньоплитні» землетруси далеко від меж.' },
+    { text: 'Вода в океані солона тому, що в ній розчинена сіль з дна.', answer: false, explain: 'Основне джерело солі — вивітрювання гірських порід на суходолі: річки тисячоліттями змивають мінерали в океан.' },
+    { text: 'Північний і Південний полюси мають однаковий клімат.', answer: false, explain: 'Арктика — океан, вкритий кригою (тепліше), Антарктида — суходіл, найхолодніше місце на планеті.' },
+    { text: 'Ми стоїмо на «твердій землі», яка насправді рухається зі швидкістю кількох сантиметрів на рік.', answer: true, explain: 'Тектонічні плити дрейфують — приблизно з такою швидкістю ростуть нігті.' },
+    { text: 'Вулкани бувають тільки на суходолі.', answer: false, explain: 'Більшість вулканічної активності Землі — під водою, на серединно-океанічних хребтах.' },
+    { text: 'Радіоактивний розпад, яким датують гірські породи, працює однаково в будь-якій точці Землі.', answer: true, explain: 'Він не залежить від тиску чи температури — тому цей метод датування працює всюди однаково.' },
+    { text: 'Найглибша точка океану глибша, ніж найвища гора — висока.', answer: true, explain: 'Маріанська западина (~11 км) глибша, ніж Еверест (~8.8 км) високий.' },
+    { text: 'Ґрунт утворюється за кілька років.', answer: false, explain: 'Формування кількох сантиметрів родючого ґрунту може тривати сотні й тисячі років.' },
+    { text: 'Компас показує точно на географічний Північний полюс.', answer: false, explain: 'Він показує на магнітний полюс, який зміщений і навіть повільно «дрейфує» відносно географічного.' },
+    { text: 'Айсберг — це замерзла морська вода.', answer: false, explain: 'Айсберги здебільшого утворюються з прісного льоду льодовиків, що сповзають в океан.' },
+    { text: 'Земна кора під океанами тонша, ніж під континентами.', answer: true, explain: 'Океанічна кора — 5-10 км, континентальна — 30-70 км.' },
+    { text: 'Ми точно знаємо, що відбувається в центрі Землі, бо туди пробурили свердловину.', answer: false, explain: 'Найглибша свердловина в історії (Кольська) — трохи більше 12 км, це навіть не пробило кору.' },
+    { text: 'Гроза «очищує» повітря.', answer: true, explain: 'Розряди сприяють утворенню озону й «вибивають» частину пилу з повітря, тому після грози дихається легше.' },
+    { text: 'Земля — єдина планета Сонячної системи, де зафіксована тектоніка плит.', answer: true, explain: 'Наскільки відомо станом на сьогодні — це один з факторів, які роблять Землю унікальною для життя.' },
+    { text: 'Атмосфера Землі складається переважно з кисню.', answer: false, explain: 'Насправді переважає азот (близько 78%), кисню — лише близько 21%.' },
+    { text: 'Озоновий шар в атмосфері захищає життя на Землі від шкідливого ультрафіолетового випромінювання Сонця.', answer: true, explain: 'Озон поглинає більшу частину УФ-B та УФ-C випромінювання.' },
+    { text: 'Веселка складається рівно із семи чітко відокремлених кольорових смуг.', answer: false, explain: 'Насправді це безперервний спектр — поділ на сім кольорів є умовною традицією (ще від Ньютона).' },
+    { text: 'Сніжинки майже завжди мають шестикутну (гексагональну) симетрію.', answer: true, explain: 'Це наслідок будови кристалічної решітки звичайного льоду.' },
+    { text: 'Найхолодніше місце на Землі знаходиться в Арктиці.', answer: false, explain: 'Рекорд належить Антарктиді — станція «Восток», -89,2°C.' },
+    { text: 'Торнадо трапляються лише на території США.', answer: false, explain: 'Вони фіксуються на всіх континентах, крім Антарктиди, хоча США справді лідирують за кількістю.' },
+    { text: 'Типова купчаста хмара практично нічого не важить.', answer: false, explain: 'Через об’єм крапель вона може «важити» сотні тонн води — просто ця маса розподілена в повітрі.' },
+    { text: 'Блискавка гарячіша, ніж поверхня Сонця.', answer: true, explain: 'Канал блискавки нагрівається приблизно до 30 000°C, поверхня Сонця — близько 5500°C.' },
+    { text: 'Світовий океан — єдине сховище води на Землі.', answer: false, explain: 'Прісна вода зберігається також у льодовиках, річках, озерах і під землею.' },
+    { text: 'Більшість запасів прісної води на планеті перебуває у твердому, замерзлому стані.', answer: true, explain: 'Левова частка «замкнена» у льодовиках і полярних крижаних шапках.' },
+    { text: 'У Мертвому морі не виживає жодна жива істота.', answer: false, explain: 'Риба й водорості там справді не живуть через високу солоність, але деякі галофільні мікроорганізми виживають.' },
+    { text: 'Океанічні течії впливають на клімат материків.', answer: true, explain: 'Наприклад, Гольфстрим суттєво зігріває Західну Європу.' },
+    { text: 'Рівень поверхні Світового океану абсолютно однаковий у всіх точках Землі.', answer: false, explain: 'Він відрізняється через гравітаційні аномалії, температуру й течії.' },
+    { text: 'Цунамі — це те саме явище, що й звичайний приплив.', answer: false, explain: 'Цунамі викликають землетруси, зсуви чи виверження, а приливи — гравітація Місяця і Сонця.' },
+    { text: 'Приливи та відпливи виникають через обертання Землі навколо власної осі.', answer: false, explain: 'Їх викликає гравітаційне притягання Місяця (і частково Сонця).' },
+    { text: 'Солоність усіх морів на Землі однакова.', answer: false, explain: 'Наприклад, Мертве море в кілька разів солоніше за середній показник океану.' },
+    { text: 'Корали — це рослини.', answer: false, explain: 'Насправді це тварини, колонії дрібних поліпів.' },
+    { text: 'Алмаз — найтвердіший природний мінерал на Землі.', answer: true, explain: '10 балів за шкалою твердості Мооса — максимум.' },
+    { text: 'Усі вулкани мають класичну конічну форму.', answer: false, explain: 'Є, наприклад, щитові вулкани з дуже пологими схилами.' },
+    { text: 'Гейзери зустрічаються тільки в Ісландії.', answer: false, explain: 'Вони є також на Камчатці, у Йеллоустоні (США) та в Новій Зеландії.' },
+    { text: 'Бурштин — це скам’яніла смола дерев.', answer: true, explain: 'Формується з затверділої й «дозрілої» протягом мільйонів років смоли хвойних дерев.' },
+    { text: 'Пісок завжди складається з кварцу.', answer: false, explain: 'Буває пісок з вулканічного скла (чорні пляжі) чи уламків коралів (рожеві пляжі).' },
+    { text: 'Астероїд і метеорит — це одне й те саме.', answer: false, explain: 'Астероїд — тіло в космосі, метеорит — те, що впало й долетіло до поверхні Землі.' },
+    { text: 'Усі гірські породи утворюються однаковим способом.', answer: false, explain: 'Є магматичні, осадові й метаморфічні породи — з різними механізмами утворення.' },
+    { text: 'Кам’яне вугілля утворилося з решток стародавніх рослин.', answer: true, explain: 'Це продукт багатомільйонного перетворення рослинних решток під тиском і без доступу кисню.' },
+    { text: 'Сучасна наука вже вміє точно передбачати дату майбутнього землетрусу.', answer: false, explain: 'Точне прогнозування часу землетрусів поки неможливе — можна лише оцінювати ризики зон.' },
+    { text: 'Магнітні полюси Землі час від часу мінялися місцями (інверсія).', answer: true, explain: 'Це підтверджують палеомагнітні дослідження гірських порід.' },
+    { text: 'Внутрішнє ядро Землі — тверде, попри шалену температуру.', answer: true, explain: 'Через колосальний тиск залізо там не плавиться, попри температуру ~5000-6000°C.' },
+    { text: 'Земна кора — найтовщий із внутрішніх шарів Землі.', answer: false, explain: 'Навпаки, кора — найтонший шар порівняно з мантією і ядром.' },
+    { text: 'Гімалаї утворилися внаслідок зіткнення двох континентальних плит.', answer: true, explain: 'Індійська плита досі напирає на Євразійську.' },
+    { text: '«Тихоокеанське вогняне кільце» — це зона підвищеної вулканічної й сейсмічної активності навколо Тихого океану.', answer: true, explain: 'Там зосереджено близько 75% активних вулканів світу.' },
+    { text: 'Кожен землетрус на планеті відчувають люди.', answer: false, explain: 'Абсолютна більшість — дуже слабкі поштовхи, які фіксують лише прилади.' },
+    { text: 'Річка Ніл тече на північ, а не на південь.', answer: true, explain: 'Від витоків у Центральній та Східній Африці до Середземного моря.' },
+    { text: 'Земля обертається навколо власної осі рівно за 24 години.', answer: false, explain: 'Зоряна доба — приблизно 23 год 56 хв, а 24 год — це усереднена сонячна доба.' },
+    { text: 'Зміна пір року викликана зміною відстані від Землі до Сонця.', answer: false, explain: 'Причина — нахил земної осі, а не відстань до Сонця.' },
+    { text: 'В Австралії Новий рік зустрічають літньої пори.', answer: true, explain: 'У Південній півкулі сезони протилежні до наших.' },
+    { text: 'Високосний рік буває рівно кожні чотири роки без жодних винятків.', answer: false, explain: 'Є виняток для «століть», не кратних 400 (наприклад, 1900 рік не був високосним).' },
+    { text: 'Один оберт Землі навколо Сонця триває точно 365 діб.', answer: false, explain: 'Насправді приблизно 365,25 доби — звідси й високосні роки.' },
+    { text: 'На полюсах Землі буває період, коли Сонце не заходить за горизонт кілька місяців поспіль.', answer: true, explain: 'Це явище називають «полярним днем».' },
+    { text: 'Ґрунт — це просто подрібнене каміння.', answer: false, explain: 'Це складна суміш мінералів, органіки, води, повітря й живих організмів.' },
+    { text: 'Дощові черв’яки покращують родючість ґрунту.', answer: true, explain: 'Вони розпушують ґрунт і переробляють органіку в доступні рослинам форми.' },
+    { text: 'Усі пустелі на Землі спекотні.', answer: false, explain: 'Існують і холодні пустелі — наприклад, узимку в Гобі чи в Антарктиді.' },
+    { text: 'Ґрунти під тропічними лісами надзвичайно родючі.', answer: false, explain: 'Насправді вони часто бідні на поживні речовини — основна маса живлення циркулює в самій рослинності.' },
+    { text: 'Найбільший запас прісної води у формі льоду зосереджений в Антарктиді.', answer: true, explain: 'Там міститься близько 90% усього льоду планети.' },
+    { text: 'Вічна мерзлота трапляється тільки в межах Арктики.', answer: false, explain: 'Вона є й у горах, зокрема на Тибетському нагір’ї, далеко за межами Арктики.' },
+    { text: 'Земля — єдина планета Сонячної системи, яка обертається навколо власної осі.', answer: false, explain: 'Навколо своєї осі обертаються всі планети, хоч і з різною швидкістю та в різних напрямках.' },
+    { text: 'З борту МКС (~400 км над Землею) астронавти бачать Землю цілком, як повну кулю на знімку «Блакитна мармурова кулька».', answer: false, explain: 'З такої висоти видно лише частину поверхні; повний диск Землі бачили тільки місячні місії з набагато більшої відстані.' },
+    { text: 'Земля — найбільша планета Сонячної системи.', answer: false, explain: 'Найбільша — Юпітер; Земля лише найбільша серед кам’янистих (землеподібних) планет.' },
+    { text: 'Байкал — найглибше озеро у світі.', answer: true, explain: 'Його глибина сягає близько 1642 метрів.' },
+    { text: 'Австралія — найменший материк на Землі.', answer: true, explain: 'За площею суходолу вона поступається всім іншим материкам.' },
+    { text: 'Найвищу офіційно зареєстровану температуру повітря на Землі виміряли в пустелі Сахара.', answer: false, explain: 'Офіційний рекорд (56,7°C) належить Долині Смерті у США.' },
+    { text: 'Виверження вулкана Кракатау в 1883 році вважається одним із наймогутніших в задокументованій історії.', answer: true, explain: 'Звук вибуху було чутно за тисячі кілометрів, а попіл вплинув на клімат планети на роки.' },
+    { text: 'Торнадо і ураган — це те саме явище під різними назвами.', answer: false, explain: 'Торнадо — невеликий вихор над сушею, ураган (тропічний циклон) — велика штормова система над океаном.' },
+    { text: 'Сьогодні сейсмологи для вимірювання землетрусів здебільшого користуються тільки шкалою Ріхтера.', answer: false, explain: 'Найчастіше використовують моментну магнітудну шкалу — вона точніша для сильних поштовхів.' },
+    { text: 'Піщані дюни в пустелі завжди нерухомі.', answer: false, explain: 'Під дією вітру дюни можуть «мандрувати» на десятки метрів за рік.' },
+    { text: 'Усі печери утворюються виключно через розчинення вапняку водою.', answer: false, explain: 'Є також лавові печери, льодяні печери та інші типи.' },
+    { text: 'Сталактити ростуть зі стелі печери, а сталагміти піднімаються з підлоги їй назустріч.', answer: true, explain: 'З часом вони можуть навіть зростися в суцільну колону.' }
+  ];
+
+  var isTv = new URLSearchParams(location.search).has('tv');
+  var content = document.getElementById('content');
+  var appWrap = document.getElementById('app-wrap');
+
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+  function uid(){ return 's-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8); }
+
+  async function getJson(url){
+    try {
+      var r = await fetch(url, { cache: 'no-store' });
+      return await r.json();
+    } catch (e) { return null; }
+  }
+  async function putJson(url, data){
+    try {
+      await fetch(url, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+      return true;
+    } catch (e) { return false; }
+  }
+
+  /* ================= STUDENT VIEW ================= */
+  function studentInit(){
+    appWrap.className = 'wrap narrow';
+    var myId = null, myGroup = null, myName = null;
+    try {
+      myId = localStorage.getItem('quiz-student-id');
+      myGroup = localStorage.getItem('quiz-student-group');
+      myName = localStorage.getItem('quiz-student-name');
+    } catch (e) {}
+
+    function answeredKey(idx){ return 'quiz-answered-' + idx; }
+    function getAnswered(idx){ try { return localStorage.getItem(answeredKey(idx)); } catch(e){ return null; } }
+    function setAnswered(idx, choice){ try { localStorage.setItem(answeredKey(idx), choice); } catch(e){} }
+
+    function showRegistration(){
+      var opts = '<option value="" disabled selected>Оберіть групу</option>' +
+        GROUPS.map(function(g){ return '<option value="' + esc(g) + '">' + esc(g) + '</option>'; }).join('');
+      content.innerHTML = '<form class="reg-form" id="reg-form">' +
+        '<div><label>Група</label><select id="reg-group" required>' + opts + '</select></div>' +
+        '<div><label>ПІБ (повністю)</label><input type="text" id="reg-name" placeholder="Прізвище Ім’я По батькові" required></div>' +
+        '<button class="btn" type="submit">Приєднатись</button>' +
+        '</form>';
+      document.getElementById('reg-form').addEventListener('submit', async function(e){
+        e.preventDefault();
+        var group = document.getElementById('reg-group').value;
+        var name = document.getElementById('reg-name').value.trim();
+        if (!group || !name) return;
+        myId = uid(); myGroup = group; myName = name;
+        try {
+          localStorage.setItem('quiz-student-id', myId);
+          localStorage.setItem('quiz-student-group', myGroup);
+          localStorage.setItem('quiz-student-name', myName);
+        } catch (err) {}
+        content.innerHTML = '<p class="status-text">Приєднуємось...</p>';
+        await putJson(studentUrl(myId), { group: myGroup, name: myName });
+        startVotingLoop();
+      });
+    }
+
+    var lastRenderedIndex = null, lastRenderedRevealed = null;
+
+    function render(meta){
+      if (!meta) {
+        content.innerHTML = whoamiHtml() + '<p class="status-text">Очікуємо, поки викладач розпочне гру...</p>';
+        return;
+      }
+      var idx = meta.currentIndex;
+      if (idx >= QUESTIONS.length) {
+        content.innerHTML = whoamiHtml() + '<p class="status-text">Гра завершена. Дякуємо за участь! 🎉</p>';
+        return;
+      }
+      var answered = getAnswered(idx);
+      var html = whoamiHtml() + '<p class="qcount">Питання ' + (idx + 1) + ' з ' + QUESTIONS.length + '</p>';
+      if (meta.revealed) {
+        var q = QUESTIONS[idx];
+        if (answered == null) {
+          html += '<div class="result-banner missed">Ти пропустив це питання</div>';
+        } else {
+          var wasCorrect = (answered === 'true') === q.answer;
+          html += '<div class="result-banner ' + (wasCorrect ? 'correct' : 'wrong') + '">' + (wasCorrect ? 'Правильно! ✓' : 'Неправильно ✗') + '</div>';
+        }
+      } else if (answered != null) {
+        html += '<p class="status-text">Ти відповів: <b>' + (answered === 'true' ? 'ПРАВДА' : 'МІФ') + '</b>. Чекай результат на екрані!</p>';
+      } else {
+        html += '<button class="vote-btn truth" data-choice="true">ПРАВДА</button>' +
+                '<button class="vote-btn myth" data-choice="false">МІФ</button>';
+      }
+      content.innerHTML = html;
+      if (!meta.revealed && answered == null) {
+        content.querySelectorAll('.vote-btn').forEach(function(btn){
+          btn.addEventListener('click', async function(){
+            content.querySelectorAll('.vote-btn').forEach(function(b){ b.disabled = true; });
+            var choice = btn.getAttribute('data-choice');
+            setAnswered(idx, choice);
+            await putJson(answerUrl(idx, myId), { choice: choice, ts: new Date().toISOString() });
+            render(meta);
+          });
+        });
+      }
+    }
+
+    function whoamiHtml(){
+      return '<p class="whoami">' + esc(myGroup) + ' · ' + esc(myName) + '</p>';
+    }
+
+    async function poll(){
+      var meta = await getJson(META_URL);
+      var idx = meta ? meta.currentIndex : null;
+      var revealed = meta ? meta.revealed : null;
+      if (idx !== lastRenderedIndex || revealed !== lastRenderedRevealed) {
+        lastRenderedIndex = idx; lastRenderedRevealed = revealed;
+        render(meta);
+      }
+    }
+
+    function startVotingLoop(){
+      poll();
+      setInterval(poll, 2000);
+    }
+
+    if (myId && myGroup && myName) {
+      startVotingLoop();
+    } else {
+      showRegistration();
+    }
+  }
+
+  /* ================= TV / HOST VIEW ================= */
+  function tvInit(){
+    var unlocked = false;
+
+    function pinScreen(){
+      content.innerHTML = '<p class="muted" style="margin-bottom:1rem;">Режим викладача — введіть PIN</p>' +
+        '<form id="pin-form"><input type="password" id="pin-input" inputmode="numeric" autocomplete="off" placeholder="Код"> <button class="btn" type="submit">Увійти</button></form>';
+      document.getElementById('pin-form').addEventListener('submit', function(e){
+        e.preventDefault();
+        if (document.getElementById('pin-input').value === PIN) { unlocked = true; tvLoop(); }
+        else { document.getElementById('pin-input').value=''; document.getElementById('pin-input').placeholder='Невірно'; }
+      });
+    }
+
+    function joinBlockHtml(){
+      var qrSrc = 'https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=' + encodeURIComponent(STUDENT_URL);
+      return '<div class="join"><img src="' + qrSrc + '" width="120" height="120" alt="QR-код"><div><p class="muted" style="margin:0 0 0.3rem;">Відскануй або відкрий:</p><p class="link">' + esc(STUDENT_URL) + '</p></div></div>';
+    }
+
+    async function setMeta(newMeta){ await putJson(META_URL, newMeta); }
+
+    // Closed questions = fully done (index < currentIndex) or the current one once revealed.
+    function statsHtml(students, answers, meta){
+      var studentIds = Object.keys(students || {});
+      if (!studentIds.length) return '';
+      var lastClosed = meta.revealed ? meta.currentIndex : meta.currentIndex - 1;
+      var rows = studentIds.map(function(id){
+        var s = students[id];
+        var correct = 0, wrong = 0, missed = 0;
+        for (var i = 0; i <= lastClosed; i++) {
+          var a = answers && answers[i] && answers[i][id];
+          if (!a) { missed++; continue; }
+          var isCorrect = (a.choice === 'true') === QUESTIONS[i].answer;
+          if (isCorrect) correct++; else wrong++;
+        }
+        return { group: s.group, name: s.name, correct: correct, wrong: wrong, missed: missed };
+      });
+      rows.sort(function(a, b){ return a.group === b.group ? a.name.localeCompare(b.name, 'uk') : a.group.localeCompare(b.group); });
+      var body = rows.map(function(r){
+        return '<tr><td>' + esc(r.group) + '</td><td>' + esc(r.name) + '</td>' +
+          '<td class="num correct">' + r.correct + '</td><td class="num wrong">' + r.wrong + '</td><td class="num missed">' + r.missed + '</td></tr>';
+      }).join('');
+      return '<div class="stats-wrap"><p class="stats-title">Статистика (' + studentIds.length + ' учасників)</p>' +
+        '<table class="stats"><thead><tr><th>Група</th><th>ПІБ</th><th>✓</th><th>✗</th><th>Пропуск</th></tr></thead><tbody>' + body + '</tbody></table></div>';
+    }
+
+    async function renderTv(){
+      if (!unlocked) return;
+      var meta = await getJson(META_URL);
+      var students = await getJson(STUDENTS_URL);
+      var answers = await getJson(ANSWERS_URL);
+
+      if (!meta) {
+        content.innerHTML = '<div class="start-screen"><p class="muted">Гру ще не почато.</p>' + joinBlockHtml() +
+          '<div class="controls" style="margin-top:1.5rem;"><button class="btn" id="start-btn">Почати гру</button></div></div>' +
+          statsHtml(students, answers, { currentIndex: -1, revealed: false });
+        document.getElementById('start-btn').addEventListener('click', async function(){
+          await setMeta({ currentIndex: 0, revealed: false });
+          renderTv();
+        });
+        return;
+      }
+      var idx = meta.currentIndex;
+      if (idx >= QUESTIONS.length) {
+        content.innerHTML = '<div class="end-screen"><p class="status-text">Гру завершено! Дякую всім за участь 🎉</p>' +
+          '<div class="controls" style="margin-top:1.2rem;"><button class="btn ghost" id="restart-btn">Почати заново</button> <button class="btn danger" id="wipe-btn">Повне скидання (нова пара)</button></div></div>' +
+          statsHtml(students, answers, meta);
+        document.getElementById('restart-btn').addEventListener('click', async function(){
+          await setMeta({ currentIndex: 0, revealed: false });
+          renderTv();
+        });
+        document.getElementById('wipe-btn').addEventListener('click', async function(){
+          if (!confirm('Стерти всіх учасників і всі відповіді? Це для нової пари/групи.')) return;
+          await fetch(BASE + '/quiz.json', { method: 'DELETE' });
+          renderTv();
+        });
+        return;
+      }
+      var q = QUESTIONS[idx];
+      var curAnswers = (answers && answers[idx]) || {};
+      var tCount = 0, fCount = 0;
+      Object.keys(curAnswers).forEach(function(id){ if (curAnswers[id].choice === 'true') tCount++; else fCount++; });
+      var total = tCount + fCount;
+      var truthPct = total ? Math.round(tCount / total * 100) : 0;
+      var mythPct = total ? 100 - truthPct : 0;
+
+      var html = '<p class="qcount">Питання ' + (idx + 1) + ' з ' + QUESTIONS.length + '</p>';
+      html += '<p class="tv-question">' + esc(q.text) + '</p>';
+      html += '<div class="bars">' +
+        '<div class="bar-col"><div class="bar-label"><span>Правда</span><span>' + tCount + '</span></div><div class="bar-track"><div class="bar-fill truth" style="width:' + truthPct + '%"></div></div></div>' +
+        '<div class="bar-col"><div class="bar-label"><span>Міф</span><span>' + fCount + '</span></div><div class="bar-track"><div class="bar-fill myth" style="width:' + mythPct + '%"></div></div></div>' +
+      '</div>';
+
+      if (meta.revealed) {
+        html += '<div class="reveal-banner ' + (q.answer ? 'truth' : 'myth') + '">Правильна відповідь: ' + (q.answer ? 'ПРАВДА' : 'МІФ') + '</div>';
+        html += '<p class="explain">' + esc(q.explain) + '</p>';
+        html += '<div class="controls"><button class="btn" id="next-btn">Наступне питання →</button></div>';
+      } else {
+        html += '<div class="controls"><button class="btn" id="reveal-btn">Показати відповідь (закриє голосування)</button></div>';
+      }
+      html += joinBlockHtml();
+      html += statsHtml(students, answers, meta);
+
+      content.innerHTML = html;
+      if (meta.revealed) {
+        document.getElementById('next-btn').addEventListener('click', async function(){
+          await setMeta({ currentIndex: idx + 1, revealed: false });
+          renderTv();
+        });
+      } else {
+        document.getElementById('reveal-btn').addEventListener('click', async function(){
+          await setMeta({ currentIndex: idx, revealed: true });
+          renderTv();
+        });
+      }
+    }
+
+    function tvLoop(){
+      renderTv();
+      setInterval(renderTv, 3000);
+    }
+
+    pinScreen();
+  }
+
+  if (isTv) { tvInit(); } else { studentInit(); }
+})();
+</script>
+</body>
+</html>
